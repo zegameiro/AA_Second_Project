@@ -11,7 +11,7 @@ class KargerAlgorithm:
 
         n_basic_operations = 0
 
-        while graph.nodes > 2:
+        while graph.nodes_number > 2:
             n_basic_operations += 1
             
             # Choose a random edge

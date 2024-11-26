@@ -3,24 +3,24 @@ import random
 import networkx as nx
 
 
-class Graph:
+class GraphV1:
 
     def __init__(self, nodes, edges) -> None:
         self.nodes_number = nodes
         self.edges_number = edges
 
-        self.nodes_merged = {str(i): str(i) for i in range(self.nodes)}
+        self.nodes_merged = {str(i): str(i) for i in range(self.nodes_number)}
 
-        self.node_positions = self.build_nodes(self.nodes_number)
-        self.edge_weight = self.build_edges(self.edges_number)
+        self.node_positions = self.build_nodes(nodes)
+        self.edge_weight = self.build_edges(edges)
 
-        self.adjency_matrix = self.build_adjency_matrix(self.edge_weight.keys())
+        self.adjency_list = self.build_adjency_list(self.edge_weight.keys())
         self.list_edges = list(self.edge_weight.keys())
 
         self.nx_graph = nx.Graph()
 
 
-    def build_nodes(self, n_nodes) -> dict:
+    def build_nodes(self, n_nodes):
         """Generate random positions for each node, using ASCII codes for letters 'a' to 'z'"""
 
         node_positions = {}
@@ -32,8 +32,9 @@ class Graph:
     
     def build_edges(self, n_edges) -> dict:
         isConnex = False
-        nodes = [chr(i) for i in range(self.nodes_number)]
+        nodes = [str(i) for i in range(self.nodes_number)]
 
+        print("Bacalhau ->", nodes)
         while(not isConnex):
             connections = {}
 
@@ -64,10 +65,10 @@ class Graph:
                     edge = tuple(sorted(edge))
 
                 # Calculate the distance between nodes
-                distance = self.calculate_distance(node_1, node_2)
+                distance = self.calculate_distance(node_1=node_1, node_2=node_2)
 
                 if edge not in connections:
-                    connections[edge] = distance
+                    connections[edge] = [distance]
 
             # Check if the graph is connected
             isConnex = self.connex_graph(nodes, connections)
@@ -77,10 +78,12 @@ class Graph:
     def calculate_distance(self, node_1, node_2) -> float:
         """Calculate the distance between 2 nodes"""
 
+        print(self.node_positions)
+
         x1, y1 = self.node_positions[node_1]
         x2, y2 = self.node_positions[node_2]
 
-        return round(((x2 - x1) ** 2 + (y2 - y1) ** 2) ** 0.5, 2)
+        return round(((x1 - x2) ** 2 + (y1 - y2) ** 2) ** 0.5, 2)
     
     def connex_graph(self, nodes, connections) -> bool:
         """Check if a graph is connex"""
@@ -93,8 +96,8 @@ class Graph:
         
         return True
     
-    def build_adjency_matrix(self, list_edges) -> dict:
-        """Build the adjency matrix associated to a graph in a dict"""
+    def build_adjency_list(self, list_edges) -> dict:
+        """Build the adjency list associated to a graph in a dict"""
 
         tmp = {}
         for edge_tuple in list_edges:
@@ -169,13 +172,10 @@ class Graph:
         for i in all_nodes:
             self.nodes_merged[i] = new_key
     
-    def draw_graph(self, filename, removed_edges=None) -> None:
+    def draw_graph(self, filename) -> None:
 
         for node1, node2 in self.edge_weight.keys():
-            if (node1, node2) in removed_edges or (node2, node1) in removed_edges:
-                self.nx_graph.add_edge(node1, node2, weight=self.edge_weight[(node1, node2)], color='red')
-            else:
-                self.nx_graph.add_edge(node1, node2, weight=self.edge_weight[(node1, node2)], color='black')
+            self.nx_graph.add_edge(node1, node2, weight=self.edge_weight[(node1, node2)][0])
 
         for node in self.node_positions.keys():
             self.nx_graph.add_node(node, pos=self.node_positions[node])
@@ -184,15 +184,11 @@ class Graph:
         pos = nx.get_node_attributes(self.nx_graph, "pos")
         nx.draw_networkx_edge_labels(self.nx_graph, pos, edge_labels)
 
-        # Get edge colors from attributes
-        edge_colors = [self.nx_graph[u][v]['color'] for u, v in self.nx_graph.edges()]
-
         nx.draw(
             self.nx_graph,
             pos,
-            edge_color=edge_colors,
             with_labels=True
         )
 
-        plt.savefig(filename)
+        plt.savefig(filename, format="PNG")
         plt.close()

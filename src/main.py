@@ -1,10 +1,8 @@
 from getopt import GetoptError, getopt
-from constants import STUDENT_NUMBER, EDGES_PERCENTAGE, GRAPHS
+from constants import GRAPHS
+from utils import generate_random_graphs, use_teachers_graphs
 
 import sys
-import random
-import os
-import time
 
 def main(argv):
 
@@ -25,10 +23,10 @@ def main(argv):
         elif opt in ("-f", "--folder"):
             folder = arg
 
-    if folder == "":
-        print("Please provide a valid folder path.")
-        sys.exit()
-
+    if folder != "":
+        use_teachers_graphs(folder)
+    else:
+        generate_random_graphs(GRAPHS)
 
 if __name__ == '__main__':
     main(sys.argv[1:])
