@@ -26,7 +26,8 @@ def main(argv):
     if folder != "":
         use_teachers_graphs(folder)
     else:
-        generate_random_graphs(GRAPHS)
+        execution_times = generate_random_graphs(GRAPHS)
+        print(execution_times)
 
 if __name__ == '__main__':
     main(sys.argv[1:])

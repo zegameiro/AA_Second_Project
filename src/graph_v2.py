@@ -1,4 +1,3 @@
-from collections import defaultdict
 
 import matplotlib.pyplot as plt
 import random
@@ -23,7 +22,7 @@ class GraphV2:
 
             for i in list_edges:
                 node1, node2 = i.split(" ")
-                final_list.append(tuple(sorted(node1, node2)))
+                final_list.append(tuple(sorted((node1, node2))))
 
             self.list_edges = final_list
             self.adjency_list = self.build_adjency_matrix(self.list_edges)
@@ -108,23 +107,15 @@ class GraphV2:
 
         return tmp
     
-    def draw_graph(self, filename, removed_edges=None) -> None:
+    def draw_graph(self, filename) -> None:
 
         for node1, node2 in self.list_edges:
-            if (node1, node2) in removed_edges or (node2, node1) in removed_edges:
-                self.nx_graph.add_edge(node1, node2, weight=self.edge_positions[(node1, node2)], color='red')
-            else:
-                self.nx_graph.add_edge(node1, node2, weight=self.edge_positions[(node1, node2)], color='black')
-
+            self.nx_graph.add_edge(node1, node2, weight=self.edge_weight[(node1, node2)])
 
         edge_labels = nx.get_edge_attributes(self.nx_graph, "weight")
 
-        # Get edge colors from attributes
-        edge_colors = [self.nx_graph[u][v]['color'] for u, v in self.nx_graph.edges()]
-
         nx.draw(
             self.nx_graph,
-            edge_color=edge_colors,
             with_labels=True
         )
 

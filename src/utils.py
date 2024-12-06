@@ -6,6 +6,7 @@ from karger_algorithm import KargerAlgorithm
 import random
 import os
 import time
+import networkx as nx
 
 def generate_random_graphs(graphs_number):
 
@@ -14,6 +15,9 @@ def generate_random_graphs(graphs_number):
     os.chdir("random_graphs")
 
     counter = 0
+    all_execution_times = {}
+    # key: (nodes, edges)
+    # value: elapsed time in miliseconds
 
     for i in range(4, graphs_number + 1):
 
@@ -41,15 +45,16 @@ def generate_random_graphs(graphs_number):
                     print(f">> Graph {counter}(Nodes {nodes_number}, Edges {edge_number})", end="\r")
 
                     graph = GraphV1(nodes=nodes_number, edges=edge_number)
-                    karger_alg = KargerAlgorithm(graph=graph)
+                    graph.draw_graph(filename=f"Graph_{i}(Nodes_{graph.nodes_number}, Edges_{graph.edges_number})_random.png")
 
+                    karger_alg = KargerAlgorithm(graph=graph)
                     edges_cut, min_cut, number_operations = karger_alg.karger_min_cut(graph=graph)
+                    all_number_operations.append(number_operations)
 
                     end = time.time() - start
 
                     all_min_cut.append(min_cut)
                     all_time.append(end)
-                    all_number_operations.append(number_operations)
 
                     f.write(
                         f">> Graph_{m}(Nodes_{nodes_number}, Edges_{edge_number}) \nCost: {min_cut}\nEdges to cut: {edges_cut}\nTime: {end}\nNumber of operations: {number_operations}\n\n"
@@ -64,7 +69,11 @@ def generate_random_graphs(graphs_number):
                 f.write("\n")
                 f.close()
 
+                all_execution_times[(nodes_number, edge_number)] = str(sum(all_time) / len(all_time))
+
     os.chdir("..")
+
+    return all_execution_times
 
 
 def use_teachers_graphs(folder):
@@ -72,11 +81,11 @@ def use_teachers_graphs(folder):
     os.chdir(folder) 
 
     # Open that files that matter to the execution
-    files = [i for i in os.listdir() if i.startswith("SW") 
-        and i.endswith("G.txt") and "DG" not in i and "DAG" not in i and "SWmediumG.txt" not in i and "SWlargeG.txt" not in i]
+    files = [i for i in os.listdir() if i.startswith("SW") and i.endswith("G.txt") and "DG" not in i and "DAG" not in i and i not in "SWtinyG.txt" and i not in "SWlargeG.txt"]
     counter = 0
 
     for file in files:
+
         f = open(file, "r")
         
         is_direct = int(f.readline())
@@ -107,9 +116,12 @@ def use_teachers_graphs(folder):
             print(f">> {counter}: {file}", end="\r")
 
             counter += 1
-            graph = GraphV2(nodes=nodes, edges=edges)
+            graph = GraphV2(nodes=nodes, edges=edges, list_edges=temp_conn)
+
             karger_alg = KargerAlgorithm(graph=graph)
             edges_cut, min_cut, number_operations = karger_alg.karger_min_cut(graph=graph)
+            all_number_operations.append(number_operations)
+
             end = time.time() - start
 
             f.write(
@@ -118,18 +130,13 @@ def use_teachers_graphs(folder):
 
             all_min_cut.append(min_cut)
             all_time.append(end)
-            all_number_operations.append(number_operations)
-
-            graph.draw_graph(
-                filename=f"Graph_{i}(Nodes_{nodes}, Edges_{edges})_teacher.png"
-            )
 
         f.write(
             f"MinCut: {str(min(all_min_cut))}, time: {str(sum(all_min_cut)/len(all_time))}, number of Basic Operations: {str(sum(all_number_operations)/len(all_number_operations))}"
         )
         f.write("\n")
         f.close()
-    os.chdir("..")
+        os.chdir("..")
 
 
             

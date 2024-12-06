@@ -34,7 +34,6 @@ class GraphV1:
         isConnex = False
         nodes = [str(i) for i in range(self.nodes_number)]
 
-        print("Bacalhau ->", nodes)
         while(not isConnex):
             connections = {}
 
@@ -77,8 +76,6 @@ class GraphV1:
     
     def calculate_distance(self, node_1, node_2) -> float:
         """Calculate the distance between 2 nodes"""
-
-        print(self.node_positions)
 
         x1, y1 = self.node_positions[node_1]
         x2, y2 = self.node_positions[node_2]
@@ -182,6 +179,7 @@ class GraphV1:
 
         edge_labels = nx.get_edge_attributes(self.nx_graph, "weight")
         pos = nx.get_node_attributes(self.nx_graph, "pos")
+        
         nx.draw_networkx_edge_labels(self.nx_graph, pos, edge_labels)
 
         nx.draw(
